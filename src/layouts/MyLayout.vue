@@ -15,7 +15,7 @@
         Conacyt Actividades
         </q-toolbar-title>
 
-        <div>Gustavo</div>
+        <div>Gustavo MS</div>
       </q-toolbar>
     </q-header>
 
