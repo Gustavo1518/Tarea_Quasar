@@ -2,7 +2,7 @@
   <div class="q-pa-md q-gutter-sm">
     <q-input label="Buscar Tarea" filled v-model="TextoB" />
     <q-editor
-    v-if="!edicion"
+      v-if="!edicion"
       v-model="editor"
       v-on:keyup.enter="saveWork"
       :definitions="{
@@ -17,15 +17,16 @@
         ['upload', 'save']
       ]"
     />
-        <q-editor v-else
+    <q-editor
+      v-else
       v-model="editor"
-      v-on:keyup.enter="saveWork"
+      v-on:keyup.enter="updateWork"
       :definitions="{
         save: {
           tip: 'Actualizar',
           icon: 'save',
           label: 'Actualizar',
-          handler: saveWork
+          handler: updateWork
         },
       }"
       :toolbar="[
@@ -56,7 +57,7 @@ export default {
       tareas: [],
       TextoB: "",
       filtradoB: [],
-      edicion: false,
+      edicion: false
     };
   },
   created() {
@@ -64,24 +65,33 @@ export default {
   },
   methods: {
     async saveWork() {
-      try {
-        const DB = await db.collection("Tareas").add({
-          texto: this.editor,
-        });
-        this.tareas.push({
-          texto: this.editor,
-          id: DB.id
-        });
+      if (this.editor == "") {
         this.$q.notify({
-          message: "Tarea Guardada Gustavo",
+          message: "Campos Vacios",
           color: "green-4",
           textColor: "white",
           icon: "cloud_done"
         });
-      } catch (error) {
-        console.log(error);
+      } else {
+        try {
+          const DB = await db.collection("Tareas").add({
+            texto: this.editor
+          });
+          this.tareas.push({
+            texto: this.editor,
+            id: DB.id
+          });
+          this.$q.notify({
+            message: "Tarea Guardada Gustavo",
+            color: "green-4",
+            textColor: "white",
+            icon: "cloud_done"
+          });
+        } catch (error) {
+          console.log(error);
+        }
+        return (this.editor = "");
       }
-      return (this.editor = "");
     },
     eliminar(index, id) {
       this.$q
@@ -96,15 +106,46 @@ export default {
             .doc(id)
             .delete()
             .then(function() {
-              console.log("elemento eliminado gustavo");
+              console.log("borrado gustavo");
             })
             .catch(function(error) {
               console.error("Error removing document: ", error);
             });
         });
     },
+    updateWork() {
+      try {
+        db.collection("Tareas")
+          .doc(this.id)
+          .update({
+            texto: this.editor
+          });
+
+        this.tareas[this.index].texto = this.editor;
+        this.index = null;
+        this.edicion = false;
+        this.id = null;
+        this.editor = "";
+        this.$q.notify({
+          message: "Tarea actualizada Gustavo!",
+          color: "dark",
+          textColor: "white",
+          icon: "cloud_done"
+        });
+      } catch (error) {
+        this.$q.notify({
+          message: error,
+          color: "red",
+          textColor: "white",
+          icon: "clear"
+        });
+      }
+    },
     editar(index, id) {
       this.edicion = true;
+      this.editor = this.tareas[index].texto;
+      this.index = index;
+      this.id = id;
       console.log("editar");
     },
     async listartareas() {
