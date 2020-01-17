@@ -1,6 +1,5 @@
 <template>
   <div class="q-pa-md q-gutter-sm">
-    <q-input label="Buscar Tarea" filled v-model="TextoB" />
     <q-editor
       v-if="!edicion"
       v-model="editor"
@@ -33,16 +32,15 @@
         ['upload', 'save']
       ]"
     />
+
     <q-btn flat color="blue" v-if="editor.length > 0" @click="limpiar">limpiar input</q-btn>
     <q-card class="row" flat bordered v-for="(item, index) in tareas" :key="index">
-      ´
-      <q-card-section class="col" v-html="item.texto" :class="item.estado? 'tachar':
-       ''" />
+      <q-card-section class="col" v-html="item.texto" />
       <q-btn flat color="blue" @click="editar(index, item.id)">Editar</q-btn>
       <q-btn flat color="red" @click="eliminar(index, item.id)">Eliminar</q-btn>
     </q-card>
     <div class="flex flex-center" v-if="tareas.length == 0">
-      <h6>Sin Tareas Pendientes Gustavo</h6>
+      <h6>SIN TAREAS PENDIENTES</h6>
     </div>
   </div>
 </template>
@@ -50,13 +48,12 @@
 <script>
 import { db } from "boot/firebase";
 import { error } from "util";
+
 export default {
   data() {
     return {
       editor: "",
       tareas: [],
-      TextoB: "",
-      filtradoB: [],
       edicion: false
     };
   },
@@ -102,6 +99,7 @@ export default {
           persistent: true
         })
         .onOk(() => {
+          this.tareas.splice(index, 1);
           db.collection("Tareas")
             .doc(id)
             .delete()
@@ -109,7 +107,7 @@ export default {
               console.log("borrado gustavo");
             })
             .catch(function(error) {
-              console.error("Error removing document: ", error);
+              console.error("Error de borrado: ", error);
             });
         });
     },
@@ -128,7 +126,7 @@ export default {
         this.editor = "";
         this.$q.notify({
           message: "Tarea actualizada Gustavo!",
-          color: "dark",
+          color: "secondary",
           textColor: "white",
           icon: "cloud_done"
         });
@@ -169,8 +167,3 @@ export default {
   }
 };
 </script>
-<style>
-.tachar {
-  text-decoration: line-through;
-}
-</style>
